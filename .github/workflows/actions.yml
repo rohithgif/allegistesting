@@ -13,7 +13,7 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v4
       with:
-        repository: rohithgif/automateGitChanges #change here username/currentRepository
+        repository: rohithgif/allegistesting #change here username/currentRepository
 
     # copy the target repository and clone
     # also setup PAT Token of repo
@@ -23,7 +23,7 @@ jobs:
         cd /home/runner/work/main
 
     
-        git clone https://x-access-token:${{ secrets.MY_GITHUB_PAT}}@github.com/rohithgif/gitAutomater.git 
+        git clone https://x-access-token:${{ secrets.MY_GITHUB_PAT}}@github.com/rohithgif/allegistesting.git 
       env:
         GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT}}
         
@@ -68,9 +68,9 @@ jobs:
                 repo.git.checkout(MainbranchName)
             autoMerge()
         if __name__ == "__main__":
-            CurrentRepositoryName =" "
-            MainbranchName = " " 
-            targetBranch = " "
-            githublocalExecutableEnvironmentDirpath = " " 
-            userName = " "
+            CurrentRepositoryName ="allegistesting"
+            MainbranchName = "main" 
+            targetBranch = "feature"
+            githublocalExecutableEnvironmentDirpath = "/home/runner/work/main" 
+            userName = "rohithgif"
             main(CurrentRepositoryName,MainbranchName,githublocalExecutableEnvironmentDirpath,targetBranch,userName)
