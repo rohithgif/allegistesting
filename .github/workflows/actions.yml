@@ -1,0 +1,76 @@
+name: run python script
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour at the top of the hour
+  workflow_dispatch:  # Allows the workflow to be manually triggered
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+      with:
+        repository: rohithgif/automateGitChanges #change here username/currentRepository
+
+    # copy the target repository and clone
+    # also setup PAT Token of repo
+    - name: Cloning Target Repository to environment using GITHUB_TOKEN
+      run: |
+        mkdir -p /home/runner/work/main
+        cd /home/runner/work/main
+
+    
+        git clone https://x-access-token:${{ secrets.MY_GITHUB_PAT}}@github.com/rohithgif/gitAutomater.git 
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT}}
+        
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'  
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run Python script
+      env:
+        GITHUB_PAT: ${{ secrets.MY_GITHUB_PAT }}
+
+      run: |
+        import git
+        import os
+
+        def main(repositoryName,MainbranchName,localEnvironmentDirpath,targetBranch,user):
+            def autoMerge():
+                repo = git.Repo(localEnvironmentDirpath+"/"+repositoryName)  
+                print(f"Fetching latest changes from remote for repository at {localEnvironmentDirpath}")
+                repo.git.fetch()
+                print(f"Checking out and pulling latest changes for branch: {MainbranchName}")
+                repo.git.checkout(MainbranchName)
+                repo.git.pull()
+                toBemerged =  targetBranch
+                if repo.git.rev_list(f"{toBemerged}..{MainbranchName}", count=True) != '0':
+                    try:
+                        repo.git.merge(MainbranchName)
+                        print(f"Successfully merged {MainbranchName} into {toBemerged}")
+                        repo.git.push(f'https://x-access-token:{os.getenv("GITHUB_PAT")}@github.com/{user}/{repoName}.git')
+                    except git.exc.GitCommandError as e:
+                        print(f"Error merging {MainbranchName} into {toBemerged}: {e}")
+                else:
+                    print(f"No merge needed for {toBemerged}; it is not behind {MainbranchName}")
+                
+                repo.git.checkout(MainbranchName)
+            autoMerge()
+        if __name__ == "__main__":
+            CurrentRepositoryName =" "
+            MainbranchName = " " 
+            targetBranch = " "
+            githublocalExecutableEnvironmentDirpath = " " 
+            userName = " "
+            main(CurrentRepositoryName,MainbranchName,githublocalExecutableEnvironmentDirpath,targetBranch,userName)
